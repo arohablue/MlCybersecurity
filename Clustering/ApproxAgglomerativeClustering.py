@@ -38,11 +38,9 @@ class ClusterNode(object):
         node_a_data_point = node_a.data_point
         node_b_data_point = node_b.data_point
 
-        node_a_data_point = node_a.data_point
-        node_b_data_point = node_b.data_point
+        distance = 0
 
-        # Calculate Euclidean distance between data points of node_a and node_b
-        distance = np.linalg.norm(node_a_data_point - node_b_data_point)
+        logger.warning("@todo: Implement euclidean distance function")
 
         return distance
 
@@ -131,12 +129,7 @@ class Cluster(object):
 
         max_distance = 0
 
-        # Iterate over all pairs of nodes from cluster_a and cluster_b and find the maximum distance
-        for node_a in cluster_a.cluster_nodes:
-            for node_b in cluster_b.cluster_nodes:
-                distance = ClusterNode.distance(node_a, node_b)
-                if distance > max_distance:
-                    max_distance = distance
+        logger.warning("@todo: Implement complete linkage distance")
 
         return max_distance
 
@@ -383,16 +376,15 @@ class ApproxAgglomerativeClustering(object):
                  The second element of tuple is the distance of those two tuples
         """
 
-        min_cluster_distance = float('inf')
-        min_cluster_pair = None
+        min_cluster_distance = 0
 
-        for cluster_a, distances in cluster_distance_dict.items():
-            for cluster_b, distance in distances.items():
-                if distance < min_cluster_distance and cluster_a != cluster_b:
-                    min_cluster_distance = distance
-                    min_cluster_pair = (cluster_a, cluster_b)
+        min_cluster_pair = ()
 
-        return min_cluster_pair, min_cluster_distance
+        logger.warning(
+            "@Todo: return a tuple where the first element is the a pair of clusters who has the minimal distance "
+            "and the second element of tuple is the distance")
+
+        return (min_cluster_pair, min_cluster_distance)
 
     @property
     def cluster_list(self):
@@ -403,7 +395,7 @@ def test_harness():
     approx_clustering = ApproxAgglomerativeClustering()
 
     # Load the dataset
-    approx_clustering.load_dataset_from_file("lab1bsamples_large.csv")
+    approx_clustering.load_dataset_from_file("lab1bsamples_small.csv")
 
     start_time = time.time()
     approx_clustering.perform_clustering()
