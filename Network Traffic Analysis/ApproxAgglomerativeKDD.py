@@ -56,6 +56,12 @@ class ClusterNode(object):
         node_a_data_point = node_a.data_point
         node_b_data_point = node_b.data_point
 
+        # Calculate Euclidean distance
+        squared_diff_sum = sum((a - b) ** 2 for a, b in zip(node_a_data_point, node_b_data_point))
+        euclidean_distance = math.sqrt(squared_diff_sum)
+
+        return euclidean_distance
+
     @staticmethod
     def similarity(node_a, node_b):
 
