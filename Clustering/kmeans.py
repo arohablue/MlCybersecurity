@@ -89,7 +89,7 @@ def main():
     X = df.iloc[:].values
 
     # Value that you want to adjust
-    num_clusters=4
+    num_clusters=15
 
     perform_k_means_clustering(X, num_clusters)
 

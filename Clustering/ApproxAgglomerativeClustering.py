@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-
+from scipy.spatial.distance import cdist
 
 logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
 logging.basicConfig(level=logging.INFO)
@@ -16,10 +16,8 @@ logger.setLevel(logging.INFO)
 
 MAX_DISTANCE = 5000
 
-
-MAX_DISTANCE_FROM_PROTOTYPE = .01
-
-MAX_CLUSTER_DISTANCE = .7
+MAX_DISTANCE_FROM_PROTOTYPE = .2
+MAX_CLUSTER_DISTANCE = .8
 
 
 class ClusterNode(object):
@@ -38,10 +36,12 @@ class ClusterNode(object):
         node_a_data_point = node_a.data_point
         node_b_data_point = node_b.data_point
 
-        distance = 0
+        # Extract coordinates from data points
+        x1, y1 = node_a_data_point
+        x2, y2 = node_b_data_point
 
-        logger.warning("@todo: Implement euclidean distance function")
-
+        # Calculate Euclidean distance
+        distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
         return distance
 
     @staticmethod
@@ -127,10 +127,20 @@ class Cluster(object):
         # Note: Complete linkage computes the maximum distance of a pair of nodes from cluster a
         #       and cluster b
 
-        max_distance = 0
+        # Initialize max_distance to a very small value
+        max_distance = float('-inf')
 
-        logger.warning("@todo: Implement complete linkage distance")
+        # Iterate through each pair of nodes in cluster_a and cluster_b
+        for node_a in cluster_a.cluster_nodes:
+            for node_b in cluster_b.cluster_nodes:
+                # Calculate the distance between node_a and node_b
+                distance = ClusterNode.distance(node_a, node_b)
+                # Update max_distance if distance is greater
+                if max_distance != 0:
+                    max_distance = max(max_distance, distance)
 
+        print(max_distance)
+        print("max_distance")
         return max_distance
 
     @property
@@ -214,7 +224,6 @@ class ApproxAgglomerativeClustering(object):
             # Step 2:  Get the minimum cluster distances
 
             (min_cluster_pair, min_cluster_distance_value) = self.get_min_cluster_distance(cluster_distance_dict)
-
             if len(min_cluster_pair) <= 1:
                 logger.warning("get_min_cluster_distance() has not been implemented correctly. Expecting a tuple of size 2"
                                "where the elements of the tuple are the two clusters that have the minimum distance")
@@ -284,10 +293,10 @@ class ApproxAgglomerativeClustering(object):
                 X.append(x)
                 Y.append(y)
 
-            plt.scatter(X, Y, s=50, c=color, marker='o', label="cluster {}".format(cluster_index + 1))
+            plt.scatter(X, Y, s=10, c=color, marker='o', label="cluster {}".format(cluster_index + 1))
             cluster_index += 1
 
-        plt.legend(scatterpoints=1)
+        plt.legend(scatterpoints=1, prop={'size': 5})
         plt.grid()
         plt.show()
 
@@ -376,15 +385,24 @@ class ApproxAgglomerativeClustering(object):
                  The second element of tuple is the distance of those two tuples
         """
 
-        min_cluster_distance = 0
-
         min_cluster_pair = ()
+        min_cluster_distance = float('inf')  # Initialize with positive infinity
 
-        logger.warning(
-            "@Todo: return a tuple where the first element is the a pair of clusters who has the minimal distance "
-            "and the second element of tuple is the distance")
+        # Check if the dictionary which contains the distance of a pair of cluster nodes is not empty
+        if not cluster_distance_dict:
+            return min_cluster_pair, min_cluster_distance
 
-        return (min_cluster_pair, min_cluster_distance)
+        # Iterate through cluster_distance_dict
+        for cluster_a, cluster_distances in cluster_distance_dict.items():
+            for cluster_b, distance in cluster_distances.items():
+                # Check if the distance is less than the current minimum distance
+                if distance != 0 and distance < min_cluster_distance:
+                    # Update the minimum distance and the pair of clusters
+                    min_cluster_distance = distance
+                    min_cluster_pair = (cluster_a, cluster_b)
+
+        # Return the pair of clusters with the minimum distance and the minimum distance itself
+        return min_cluster_pair, min_cluster_distance
 
     @property
     def cluster_list(self):
@@ -395,7 +413,7 @@ def test_harness():
     approx_clustering = ApproxAgglomerativeClustering()
 
     # Load the dataset
-    approx_clustering.load_dataset_from_file("lab1bsamples_small.csv")
+    approx_clustering.load_dataset_from_file("lab1bsamples_large.csv")
 
     start_time = time.time()
     approx_clustering.perform_clustering()

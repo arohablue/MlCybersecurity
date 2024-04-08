@@ -8,7 +8,7 @@ import time
 
 
 # Load the dataset from file
-df = pd.read_csv("lab1bsamples_large.csv", header=None)
+df = pd.read_csv("lab1bsamples_small.csv", header=None)
 df.tail()
 print(df.tail())
 
@@ -20,7 +20,7 @@ X_std[:, 0] = (X_std[:, 0] - X_std[:, 0].mean()) / (X_std[:, 0].std())
 X_std[:, 1] = (X_std[:, 1] - X_std[:, 1].mean()) / (X_std[:, 1].std())
 
 # Value that you want to adjust
-num_clusters=2
+num_clusters=15
 
 # Initialize KMeans
 ac = AgglomerativeClustering(n_clusters=num_clusters,
