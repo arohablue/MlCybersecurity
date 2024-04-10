@@ -9,12 +9,13 @@ from collections import defaultdict
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 import math
+import pandas as pd
 
 MAX_DISTANCE = 5000
 
 MAX_DISTANCE_FROM_PROTOTYPE = 15
 
-MAX_CLUSTER_DISTANCE = 25
+MAX_CLUSTER_DISTANCE = 24
 
 
 header_names = ['duration', 'protocol_type', 'service', 'flag', 'src_bytes', 'dst_bytes', 'land', 'wrong_fragment', 'urgent', 'hot', 'num_failed_logins', 'logged_in', 'num_compromised', 'root_shell', 'su_attempted', 'num_root', 'num_file_creations', 'num_shells', 'num_access_files', 'num_outbound_cmds', 'is_host_login', 'is_guest_login', 'count', 'srv_count', 'serror_rate', 'srv_serror_rate', 'rerror_rate', 'srv_rerror_rate', 'same_srv_rate', 'diff_srv_rate', 'srv_diff_host_rate', 'dst_host_count', 'dst_host_srv_count', 'dst_host_same_srv_rate', 'dst_host_diff_srv_rate', 'dst_host_same_src_port_rate', 'dst_host_srv_diff_host_rate', 'dst_host_serror_rate', 'dst_host_srv_serror_rate', 'dst_host_rerror_rate', 'dst_host_srv_rerror_rate', 'attack_type', 'success_pred']
@@ -228,10 +229,18 @@ class ApproxAgglomerativeClusteringKDD(object):
         # Remove the attack type labels
         train_x_raw = train_df.drop(['attack_type', 'attack_category'], axis=1)
 
-        # Remove the features from set that are not continuous
-        raise Exception("Need to create a training data set with only continuous features")
-        train_x_continuous = None # Training data set with only continuous features
+        # Get continuous feature names from kddcup_name.txt
+        continuous_features = []
+        with open('NSL-KDD/kddcup.names.txt', 'r') as file:
+            next(file)  # Skip the first line
+            for line in file:
+                feature_info = line.strip().split(':')
+                feature_name = feature_info[0].strip()
+                feature_type = feature_info[1].strip().lower()
+                if feature_name != 'label' and feature_type == 'continuous.':
+                    continuous_features.append(feature_name)
 
+        train_x_continuous = train_x_raw[continuous_features]
 
         # Standardize the data
         standard_scaler = StandardScaler().fit(train_x_continuous)
@@ -340,7 +349,7 @@ class ApproxAgglomerativeClusteringKDD(object):
         num_clusters = len(self._cluster_list)
 
         # Plotting
-        plt.figure()
+        plt.figure(figsize=(10, 8))
         colors = cm.rainbow(np.linspace(0, 1, num_clusters))
 
 
